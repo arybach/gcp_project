@@ -1,0 +1,11 @@
+# sudo apt install yt-dlp # 2023.1.6 version
+# wget https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp.tar.gz
+# tar -xvzf yt-dlp.tar.gz
+# cd yt-dlp
+# sudo python3 setup.py install
+# yt-dlp --version
+
+scikit_learn==1.2.1
+pydub==0.25.1
+youtube_dl=2021.12.17
+nltk=3.8.1
