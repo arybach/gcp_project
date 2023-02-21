@@ -31,7 +31,11 @@ services:
       - zeppelin
 
   zeppelin:
-    image: apache/zeppelin:0.10.1
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    user: root    
+    #image: apache/zeppelin:0.10.1
     container_name: zeppelin
     depends_on:
       - spark-master

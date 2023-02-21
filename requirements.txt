@@ -7,5 +7,7 @@
 
 scikit_learn==1.2.1
 pydub==0.25.1
-youtube_dl=2021.12.17
-nltk=3.8.1
+youtube_dl==2021.12.17
+nltk==3.8.1
+pandas
+pandasql

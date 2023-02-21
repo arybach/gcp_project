@@ -4,6 +4,7 @@
 # cd yt-dlp
 # sudo python3 setup.py install
 # yt-dlp --version
+# pip install -r requirements.txt
 
 import os, re
 #import yt_dlp 
