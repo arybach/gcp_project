@@ -11,8 +11,11 @@ services:
       - "7077:7077"
     environment:
       - INIT_DAEMON_STEP=setup_spark
+      - PYSPARK_PYTHON=python3
+      - PYSPARK_DRIVER_PYTHON=python3
     volumes:
       - spark_volume:/spark
+      - spark_data:/opt
     networks:
       - zeppelin
 
@@ -27,6 +30,8 @@ services:
       - "SPARK_MASTER=spark://spark-master:7077"
       - "SPARK_WORKER_CORES=2"
       - "SPARK_WORKER_MEMORY=4g"
+    volumes:
+      - spark_data:/opt
     networks:
       - zeppelin
 
@@ -36,11 +41,13 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8081:8081"
+      - "8082:8081"
     environment:
       - "SPARK_MASTER=spark://spark-master:7077"
       - "SPARK_WORKER_CORES=2"
       - "SPARK_WORKER_MEMORY=4g"
+    volumes:
+      - spark_data:/opt
     networks:
       - zeppelin
 
@@ -54,11 +61,12 @@ services:
     depends_on:
       - spark-master
     ports:
-      - "8082:8080"
+      - "8084:8080"
     volumes:
       - ./zeppelin/notebook:/opt/zeppelin/notebook
       - ./zeppelin/conf/log4j.properties:/opt/zeppelin/conf/log4j.properties
-      - ./zeppelin/conf:/opt/zeppelin/conf
+      - ./zeppelin/conf:/opt/zeppelin/conf # needed for conda env to be activated - manually delete interpreter.json on restarts
+      - spark_data:/opt
       - spark_volume:/opt/zeppelin/spark
     environment:
       - "SPARK_HOME=/opt/zeppelin/spark"
@@ -95,3 +103,4 @@ networks:
 
 volumes:
     spark_volume:
+    spark_data:

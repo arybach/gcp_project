@@ -52,8 +52,8 @@ RUN conda install -y opencv && \
     pip3 install --no-cache-dir --upgrade pip setuptools yt-dlp pipenv pyOpenSSL && \
     pip3 install --no-cache-dir -r requirements.txt && \
     /opt/conda/bin/conda create --name py310 python=3.10 -y && \
-    echo "conda activate py310" >> /opt/zeppelin/conf/zeppelin-env.sh 
-    
+    echo "conda activate py310" >> /opt/zeppelin/conf/zeppelin-env.sh
+
 # Set the interpreter properties in zeppelin-site.xml
 RUN echo "<property><name>zeppelin.python</name><value>/opt/conda/envs/py310/bin/python</value></property>" >> /opt/zeppelin/conf/zeppelin-site.xml \
     && echo "<property><name>zeppelin.pyspark.python</name><value>/opt/conda/envs/py310/bin/python</value></property>" >> /opt/zeppelin/conf/zeppelin-site.xml
