@@ -1,4 +1,3 @@
 zeppelin/conf/interpreter.json
 zeppelin/conf/notebook-authorization.json
-zeppelin/notebook/scripts/*
 zeppelin/notebook/
