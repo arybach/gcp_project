@@ -5,9 +5,12 @@
 # sudo python3 setup.py install
 # yt-dlp --version
 
-scikit_learn==1.2.1
-pydub==0.25.1
-youtube_dl==2021.12.17
-nltk==3.8.1
-pandas
-pandasql
+scikit-learn<=1.2.1
+# scikit-learn-intelex # to fasten scikit-learn
+pydub<=0.25.1
+youtube-dl<=2021.12.17
+nltk<=3.8.1
+pandas<=1.5.3
+pandasql<=0.7.3
+jupyter_client<=7.4.8
+ipykernel<=6.19.2

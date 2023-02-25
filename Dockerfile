@@ -21,13 +21,14 @@ ENV GID=1001
 
 WORKDIR /opt
 
-# Update the system and install ffmpeg and yt_dlp and deps (libgomp1 is pandas dependency)
+# Update the system and install ffmpeg and yt_dlp and deps (libgomp1 is pandas dependency) - conda only supports python 3.9
 RUN apt-get update && \
     apt-get install -y libgomp1 libavcodec-extra libavformat-dev libavutil-dev libswscale-dev && \
     apt-get install -y openssl && \
-    apt-get install -y python3.10 python3-pip ffmpeg gfortran && \
+    apt-get install -y python3.9 python3-pip ffmpeg gfortran && \
     apt-get install -y gcc g++ python3-dev git ninja-build && \
     apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 && \
+    apt-get install -y libprotobuf-dev protobuf-compiler python3-protobuf python3-grpcio && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Miniconda
@@ -38,8 +39,8 @@ RUN rm -rf /opt/conda && \
     /opt/conda/bin/conda clean -afy && \
     rm -rf /opt/conda/pkgs/* && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc && \
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> /opt/zeppelin/conf/zeppelin-env.sh && \
+    echo "conda activate pyspark_env" >> /opt/zeppelin/conf/zeppelin-env.sh && \
     chown -R zeppelin /opt/conda
 
 ENV PATH="/opt/conda/bin:${PATH}"
@@ -47,26 +48,18 @@ ENV PATH="/opt/conda/bin:${PATH}"
 # Copy the requirements file into the Docker image
 COPY requirements.txt .
 
-# Install all dependencies and create+activate a new conda environment with Python 3.10
-RUN conda install -y opencv && \
-    pip3 install --no-cache-dir --upgrade pip setuptools yt-dlp pipenv pyOpenSSL && \
-    pip3 install --no-cache-dir -r requirements.txt && \
-    /opt/conda/bin/conda create --name py310 python=3.10 -y && \
-    echo "conda activate py310" >> /opt/zeppelin/conf/zeppelin-env.sh
+# Install dependencies to pyspark_env environment
+RUN conda config --add channels conda-forge && \
+    conda config --add channels anaconda && \
+    conda install -y opencv grpcio protobuf pyarrow pandas conda-pack yt-dlp pipenv pyOpenSSL ffmpeg && \
+    conda clean -afy && \
+    rm -rf /opt/conda/pkgs/*
 
-# Set the interpreter properties in zeppelin-site.xml
-RUN echo "<property><name>zeppelin.python</name><value>/opt/conda/envs/py310/bin/python</value></property>" >> /opt/zeppelin/conf/zeppelin-site.xml \
-    && echo "<property><name>zeppelin.pyspark.python</name><value>/opt/conda/envs/py310/bin/python</value></property>" >> /opt/zeppelin/conf/zeppelin-site.xml
+COPY --chown=zeppelin:zeppelin pyspark_env.tar.gz /opt/pyspark_env.tar.gz
 
-RUN rm -rf /root/.cache  && \
-    chown -R zeppelin /opt/zeppelin/notebook/ 
-
-# Set environment variables
-# ENV DEBUG_LOG_LEVEL=debug
-# ENV DEBUG_LOG_FILE=/opt/zeppelin/logs/debug.log
-
-# Set the entrypoint to Zeppelin
-# ENTRYPOINT ["/bin/bash", "-c", "python3 -m pdb /opt/zeppelin/bin/zeppelin.sh --debug --log-level=$DEBUG_LOG_LEVEL --log-file=$DEBUG_LOG_FILE"]
-ENTRYPOINT ["/opt/zeppelin/bin/zeppelin.sh"]
-
-# docker build -t zeppelin_ffmpeg_ytdlp_cv2:0.10.1 /home/groot/gcp_project/
+# extract the pyspark environment from mounted ./opt:/opt
+RUN mkdir -p /opt/zeppelin/pyspark_env && \
+    tar xzf /opt/pyspark_env.tar.gz -C /opt/zeppelin/pyspark_env && \
+    . /opt/conda/etc/profile.d/conda.sh && \
+    conda activate /opt/zeppelin/pyspark_env && \
+    conda-unpack
