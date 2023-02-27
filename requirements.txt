@@ -5,6 +5,7 @@
 # sudo python3 setup.py install
 # yt-dlp --version
 
+pyspark==3.2.3
 scikit-learn<=1.2.1
 # scikit-learn-intelex # to fasten scikit-learn
 pydub<=0.25.1

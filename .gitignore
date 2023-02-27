@@ -1,4 +1,9 @@
 zeppelin/conf/interpreter.json
 zeppelin/conf/notebook-authorization.json
 zeppelin/notebook/
-pyspark_env.tar.gz
+env/pyspark_env.tar.gz
+env 
+jupyter/notebooks/fhvhv*
+jupyter/notebooks/.ipynb_checkpoints
+jupyter/notebooks/head.csv
+jupyter/notebooks/taxi_zone_lookup.csv
