@@ -35,6 +35,32 @@ RUN wget -q "https://archive.apache.org/dist/spark/spark-${APACHE_SPARK_VERSION}
     tar xzf "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" -C /usr/local --owner root --group root --no-same-owner && \
     rm "spark-${APACHE_SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
 
+# Add Google Cloud Storage connector
+# ARG gcs_connector_version="hadoop3-2.2.0"
+# ENV GCS_CONNECTOR_VERSION="${gcs_connector_version}"
+
+# RUN wget -q "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-${GCS_CONNECTOR_VERSION}.jar" -P "${SPARK_HOME}/jars/"
+# from pyspark.conf import SparkConf
+# from pyspark.context import SparkContext
+# credentials_location = "path/to/google_credentials.json"
+# conf = SparkConf() \
+# 	.setMaster('local[*]') \
+# 	.setAppName('test') \
+# 	.set("spark.jars", "/path2/apache-spark/3.3.2/jars/gcs-connector-hadoop3-latest.jar" ) \
+# 	.set("spark.hadoop.google.cloud.auth.servicee.account.enable", "true") \
+# 	.set("spark.hadoop.google.cloud.auth.service.account.json.keyfile", credentials_location)
+	
+# sc = SparkContext(conf=conf)
+
+# hadoop_conf = sc._jsc.hadoopConfiguration()
+
+# hadoop_conf.set("fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
+# hadoop_conf.set("fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS")
+# hadoop_conf.set("fs.gs.auth.service.account.json.keyfile", credentials_location)
+# hadoop_conf.set("fs.gs.auth.service.account.enable", "true")
+	
+
+
 WORKDIR /usr/local
 
 # Configure Spark
@@ -73,10 +99,10 @@ RUN mamba update mamba && \
     mamba install --quiet --yes \
     'pyarrow' 'opencv' 'pandas' 'yt-dlp' 'pipenv' 'pyOpenSSL' 'ffmpeg' 'scikit-learn<=1.2.1' 'pydub<=0.25.1' && \
     mamba install --quiet --yes \
-    'youtube-dl' 'nltk<=3.8.1' 'pandas<=1.5.3' 'pandasql<=0.7.3' && \
+    'youtube-dl' 'nltk<=3.8.1' 'pandas<=1.5.3' 'pandasql<=0.7.3' 'google-cloud-storage' 'google-api-python-client' 'openai' 'google-cloud-videointelligence' && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home"
-#    fix-permissions "/home/${NB_USER}"
+    fix-permissions "/home" && \
+    fix-permissions "/home/${NB_USER}"
 
 WORKDIR /home/work

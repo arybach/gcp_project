@@ -1,0 +1,37 @@
+provider "google" {
+  project = "gcpzoomcamp"
+  region  = "us-central1"
+  zone    = "us-central1-a"
+}
+
+resource "google_dataproc_cluster" "sparkhudi" {
+  name          = "sparkhudi"
+  project       = "gcpzoomcamp"
+  region        = "us-central1"
+  zone          = "us-central1-a"
+  master_machine_type = "n1-standard-8"
+  master_boot_disk {
+    type = "pd-ssd"
+    size_gb = 80
+  }
+  image_version = "2.1-ubuntu20"
+  optional_components = ["HUDI", "ANACONDA", "JUPYTER"]
+  initialization_action {
+    script = "gs://$BUCKET/path/to/install.sh"
+  }
+  lifecycle {
+    ignore_changes = [
+      initialization_action
+    ]
+  }
+  # Enable Component Gateway and specify subnet
+  endpoint_config {
+    enable_http_port_access = true
+    http_ports = ["8080"]
+    subnet_uri = "projects/gcpzoomcamp/regions/us-central1/subnetworks/public"
+  }
+  # Use single-node cluster
+  master_config {
+    num_instances = 1
+  }
+}
