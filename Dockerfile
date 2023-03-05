@@ -79,11 +79,33 @@ RUN cp -p "${SPARK_HOME}/conf/spark-defaults.conf.template" "${SPARK_HOME}/conf/
     echo 'spark.driver.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf" && \
     echo 'spark.executor.extraJavaOptions -Dio.netty.tryReflectionSetAccessible=true' >> "${SPARK_HOME}/conf/spark-defaults.conf"
 
+# latest version of ffmpeg is not in the oficial repos
+RUN apt-get update && apt-get install -y wget
+
+# Download and extract FFmpeg
+RUN apt-get update && apt-get install -y wget
+RUN wget https://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
+RUN tar xjf ffmpeg-snapshot.tar.bz2
+RUN cd ffmpeg && ./configure --enable-shared
+RUN cd ffmpeg && make -j$(nproc) && make install
+
+# ffmpeg dependencies and latest versions:
+# libavutil      58.  2.100
+# libavcodec     60.  3.100
+# libavformat    60.  3.100
+# libavdevice    60.  1.100
+# libavfilter     9.  3.100
+# libswscale      7.  1.100
+# libswresample   4. 10.100
+# libpostproc    57.  1.100
+# sudo apt-get install -y libgomp1 libavcodec-extra libavformat-dev libavutil-dev libswscale-dev && \
+# installing yje exact versions as repos have not yet been updated  
+
 # Update the package lists and install necessary packages 
 RUN sudo apt-get update && \
-    sudo apt-get install -y libgomp1 libavcodec-extra libavformat-dev libavutil-dev libswscale-dev && \
+    sudo apt-get install -y libavutil58=58.2.100 libavcodec60=60.3.100 libavformat60=60.3.100 libavdevice60=60.1.100 libavfilter9=9.3.100 libswscale7=7.1.100 libswresample4=4.10.100 libpostproc57=57.1.100 && \
     sudo apt-get install -y openssl && \
-    sudo apt-get install -y python3.9 python3-pip ffmpeg gfortran && \
+    sudo apt-get install -y python3.9 python3-pip gfortran && \
     sudo apt-get install -y gcc g++ python3-dev git ninja-build && \
     sudo apt-get install -y wget bzip2 ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 && \
     sudo apt-get install -y libprotobuf-dev protobuf-compiler python3-protobuf python3-grpcio && \
@@ -97,7 +119,7 @@ RUN mamba update mamba && \
     mamba config --add channels conda-forge && \
     mamba config --add channels bioconda && \
     mamba install --quiet --yes \
-    'pyarrow' 'opencv' 'pandas' 'yt-dlp' 'pipenv' 'pyOpenSSL' 'ffmpeg' 'scikit-learn<=1.2.1' 'pydub<=0.25.1' && \
+    'pyarrow' 'opencv' 'pandas' 'yt-dlp' 'pipenv' 'pyOpenSSL' 'ffmpeg' 'scikit-learn<=1.2.1' 'pydub<=0.25.1' 'moviepy' 'skimage' && \
     mamba install --quiet --yes \
     'youtube-dl' 'nltk<=3.8.1' 'pandas<=1.5.3' 'pandasql<=0.7.3' 'google-cloud-storage' 'google-api-python-client' 'openai' 'google-cloud-videointelligence' && \
     mamba clean --all -f -y && \

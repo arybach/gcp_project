@@ -9,4 +9,5 @@ jupyter/notebooks/head.csv
 jupyter/notebooks/taxi_zone_lookup.csv
 jupyter/notebooks/config.py
 jupyter/notebooks/__pycache__
-jupyter/notebooks/videos
+jupyter/notebooks/data
+jupyter/partitions

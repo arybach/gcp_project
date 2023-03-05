@@ -1,4 +1,4 @@
-import os
+import os, cv2
 import json
 import statistics
 import pandas as pd
@@ -8,6 +8,8 @@ from typing import Dict, List
 from datetime import datetime
 from pydub import AudioSegment
 import moviepy.editor as mp
+from skimage import transform
+
 
 def save_frames_as_images(video_path, frames_dir, start_time=0, end_time=None, every_ms=None):
     cap = cv2.VideoCapture(video_path)
@@ -67,25 +69,23 @@ def save_frames_as_parquet(video_path, frames_dir, parquet_path):
     df = pd.DataFrame({'frame': frames})
     df.to_parquet(parquet_path)
 
-    
-def extract_frames(video_path: str, output_path: str, pixel_quantity: int = 6) -> Dict[int, List[List[int]]]:
-    """ Extract frames from a video file and save them as RGB pixel arrays in a dictionary """
-    # job 1
+def extract_frames(video_path, output_path, pixel_quantity=6):
     begin_time = datetime.now()
     frame_pixels = {}
-    with VideoFileClip(video_path) as video:
+    with mp.VideoFileClip(video_path) as video:
         for i, frame in enumerate(video.iter_frames()):
             # resize the frame to a fixed width and compute the RGB pixel values
-            resized_frame = imresize(frame, (frame.shape[0], pixel_quantity))
-            rgb_pixels = resized_frame.reshape(-1, 3).tolist()
+            resized_frame = transform.resize(frame, (frame.shape[0], pixel_quantity))
+            rgb_pixels = (resized_frame * 255).astype(np.uint8).reshape(-1, 3).tolist()
             frame_pixels[i] = rgb_pixels
-            # save the frame image to disk if needed
-            if output_path:
-                frame_image = Image.fromarray(frame)
-                frame_image.save(f"{output_path}/{i}.jpg")
-    print(f"Extracted {len(frame_pixels)} frames from {video_path} in {datetime.now() - begin_time}")
-    return frame_pixels
 
+            # save the frame as an image file
+            frame_path = os.path.join(output_path, f"{i}.jpg")
+            cv2.imwrite(frame_path, frame)
+
+    end_time = datetime.now()
+    print(f"Extracted {len(frame_pixels)} frames in {(end_time - begin_time).seconds} seconds")
+    return frame_pixels
 
 def process_audio(audio_path: str) -> pd.DataFrame:
     """ Process an audio file and return a DataFrame of summary statistics """
@@ -133,8 +133,8 @@ def cut_frames(frame_pixels, sound_df, path_to_video, path_to_audio):
     # Read audio from video file and save to output directory
     clip = mp.VideoFileClip(path_to_video)
     audio = clip.audio
-    audio.write_audiofile(path_to_audio)
-
+    #audio.write_audiofile(path_to_audio)
+    audio.write_audiofile(path_to_audio, codec='libmp3lame')
     # Load audio file and extract desired sound section using provided sound dataframe
     sound = mp.AudioFileClip(path_to_audio)
     start = sound_df['Start'].iloc[0]

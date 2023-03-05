@@ -19,3 +19,5 @@ services:
     #  - JUPYTERHUB_API_TOKEN='75875bb89567570c9136ed9506037121ad1a5983d900da7ac85aa7c8af3f166c'
       - SPARK_WORKER_CORES=2
       - SPARK_WORKER_MEMORY=4g
+    cpus: 3
+    mem_limit: 12g
